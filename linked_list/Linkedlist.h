@@ -1,5 +1,6 @@
 #pragma once
 #include "Node.h"
+#include <vector>
 
 class Linkedlist {
 
@@ -8,9 +9,11 @@ class Linkedlist {
         int size;
         
         void insert_to_head(int value);
-        void insert_to_head(Node node);
+        void insert_to_head(Node * node);
 
-        bool remove_node_with_value(int value);
+        bool remove_nodes_with_value(int value);
+        std::vector<int> iter_values();
+
         void print_linked_list();
 
         Linkedlist(Node* root=nullptr);

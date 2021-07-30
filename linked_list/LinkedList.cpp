@@ -1,16 +1,16 @@
 #include <iostream>
+#include <vector>
+
 #include "Linkedlist.h"
 
 namespace
 {
-    void _insert_to_head(Linkedlist* ll, Node& n) {
+    void _insert_to_head(Linkedlist* ll, Node* n) {
         if (ll->root) {
-            n.next = ll->root;
-            ll->root = &n; // Pass by reference by still need memory address?
-        }
-        else {
-            std::cout << "Assigning to " << n.value << "\n";
-            ll->root = &n;
+            n->next = ll->root;
+            ll->root = n;
+        } else {
+            ll->root = n;
         }
         ll->size += 1;
     }
@@ -20,44 +20,62 @@ namespace
 Linkedlist::Linkedlist(Node* root) {
     this->root = root;
     if (root) {
-        std::cout << "inside" << "\n";
         this->size += 1;
     }
 };
 
+std::vector<int> Linkedlist::iter_values() {
+    std::vector<int> values;
+    Node* current_node = this->root;
+
+    while (current_node) {
+        values.push_back(current_node->value);
+        current_node = current_node->next;
+    }
+    return values;
+    
+}
+
 void Linkedlist::insert_to_head(int value) {
-    Node n(value);
+    /* 
+    - Remember when using "new" to also "delete" it later on, preventing memory leaks.
+
+    - Create the object using "new". Creating an object without new with create it on the stack,
+      when leaving this function the object will then be destroyed. Hence, our linked list will
+      be pointing to a now, deleted object.
+    */
+    Node * n = new Node(value);       
     _insert_to_head(this, n);
 };
 
-void Linkedlist::insert_to_head(Node n) {
+void Linkedlist::insert_to_head(Node * n) {
     _insert_to_head(this, n);
 }
 
 void Linkedlist::print_linked_list() {
-    Node* n = this->root;
-    while (n) {
-        std::cout << n->value << " --> ";
-        n = n->next;
+   auto iter_values = this->iter_values();
+
+    for (auto const& value : iter_values) { // https://stackoverflow.com/questions/60803776/what-does-auto-const-x-do-in-c
+        std::cout << value << " --> ";
     }
+    std::cout << "\n";
 }
 
-bool Linkedlist::remove_node_with_value(int value) {
+bool Linkedlist::remove_nodes_with_value(int value) {
     Node* previous_node = nullptr;
     Node* current_node = this->root;
     while (current_node) {
         if (current_node->value == value) {
             if (previous_node) {
                 previous_node->next = current_node->next;
-                this->size -= 1;
-                return true;
-            } else { /* Removing first item from list */
+            } else { // Removing first item from list
                 this->root = current_node->next;
-                this->size -= 1;
-                return true;
             }
-        }
-        else {
+            auto to_delete = current_node;
+            current_node = current_node->next;
+            delete(to_delete); // Prevent memory leak
+            this->size -= 1;
+        } else {
             previous_node = current_node;
             current_node = current_node->next;
         }
